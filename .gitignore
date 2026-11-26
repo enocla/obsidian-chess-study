@@ -1,8 +1,8 @@
 node_modules/
-main.js
+/main.js
 *.map
 data.json
 eval-cache.json
 .DS_Store
 pieces-neo.json
-styles.css
+/styles.css

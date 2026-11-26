@@ -1,0 +1,568 @@
+@import "chessground/assets/chessground.base.css";
+@import "chessground/assets/chessground.cburnett.css";
+
+/* Board look follows Brilliant Chess; everything around the board uses Obsidian's theme variables. */
+
+.chess-study {
+	--cs-light: #f0d9b5;
+	--cs-dark: #b58863;
+	--cs-highlight: #ffff33;
+	--cs-last-move: var(--cs-highlight);
+	--cs-max-width: 400px;
+	--cs-eval-white: #ffffff;
+	--cs-eval-black: #403d39;
+	--cs-radius: 4px;
+	--cs-eval-width: 24px;
+
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+	width: 100%;
+	margin: var(--size-4-2) 0;
+	container: chess-study / inline-size;
+	color: var(--text-normal);
+	font-family: var(--font-interface);
+	outline: none;
+}
+
+.is-mobile .chess-study {
+	--cs-eval-width: 18px;
+}
+
+.chess-study:focus-visible .cs-board-wrap {
+	box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+	border-radius: var(--cs-radius);
+}
+
+/* ------------------------------------------------------------ header */
+
+.chess-study .cs-header {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: var(--font-ui-small);
+}
+
+.chess-study .cs-players {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--size-4-2);
+	font-weight: var(--font-semibold);
+}
+
+.chess-study .cs-player {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.chess-study .cs-player-dot {
+	width: 10px;
+	height: 10px;
+	border-radius: 2px;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.chess-study .cs-player-white .cs-player-dot {
+	background: var(--cs-eval-white);
+}
+
+.chess-study .cs-player-black .cs-player-dot {
+	background: var(--cs-eval-black);
+}
+
+.chess-study .cs-elo,
+.chess-study .cs-vs,
+.chess-study .cs-meta {
+	color: var(--text-muted);
+	font-weight: var(--font-normal);
+}
+
+/* ------------------------------------------------------------ layout */
+
+/* Board (with eval bar) on the left, a panel with the moves on the right. The panel is taken
+   out of flow so the board alone sets the row height and the move list scrolls inside it. */
+.chess-study .cs-layout {
+	display: grid;
+	grid-template-columns: minmax(0, calc(var(--cs-max-width) + var(--cs-eval-width) + var(--size-4-2))) minmax(200px, 1fr);
+	gap: var(--size-4-3);
+}
+
+.chess-study .cs-side {
+	position: relative;
+	min-width: 0;
+}
+
+.chess-study .cs-side-inner {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-4-2);
+}
+
+@container chess-study (max-width: 520px) {
+	.chess-study .cs-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.chess-study .cs-side-inner {
+		position: static;
+	}
+
+	.chess-study .cs-moves {
+		max-height: 14em;
+	}
+}
+
+/* ------------------------------------------------------------ board and eval bar */
+
+.chess-study .cs-main {
+	display: flex;
+	align-items: stretch;
+	gap: var(--size-4-2);
+}
+
+.chess-study .cs-board-wrap {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	max-width: var(--cs-max-width);
+}
+
+.chess-study .cs-board {
+	width: 100%;
+	aspect-ratio: 1;
+	container-type: inline-size;
+}
+
+.chess-study .cs-board.cg-wrap {
+	box-sizing: border-box;
+}
+
+.chess-study cg-board {
+	border-radius: var(--cs-radius);
+	overflow: hidden;
+	background: conic-gradient(var(--cs-dark) 0 25%, var(--cs-light) 0 50%, var(--cs-dark) 0 75%, var(--cs-light) 0) 0 0 / 25% 25%;
+}
+
+.chess-study cg-board square.last-move,
+.chess-study cg-board square.selected {
+	background-color: color-mix(in srgb, var(--cs-last-move) 50%, transparent);
+}
+
+.chess-study cg-board square.selected {
+	background-color: color-mix(in srgb, var(--cs-highlight) 50%, transparent);
+}
+
+.chess-study cg-board square.move-dest {
+	background: radial-gradient(circle closest-side, rgba(0, 0, 0, 0.15) 30%, transparent 32%);
+}
+
+.chess-study cg-board square.move-dest.oc {
+	background: radial-gradient(circle closest-side, transparent 75%, rgba(0, 0, 0, 0.15) 77% 99%, transparent 100%);
+}
+
+.chess-study cg-board square.move-dest:hover {
+	box-shadow: inset 0 0 0 calc(100cqw / 160) rgba(255, 255, 255, 0.65);
+}
+
+.chess-study.cs-hide-dests cg-board square.move-dest:not(.oc) {
+	background: none;
+}
+
+.chess-study cg-board square.check {
+	background: radial-gradient(ellipse at center, rgba(255, 0, 0, 1) 0%, rgba(231, 0, 0, 1) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%);
+}
+
+/* Coordinates inside the edge squares, like Brilliant Chess. */
+.chess-study .cg-wrap coords {
+	opacity: 1;
+	font-family: var(--font-interface);
+	font-weight: 700;
+	font-size: calc(100cqw / 32);
+	line-height: 1;
+	text-transform: lowercase;
+}
+
+.chess-study .cg-wrap coords.ranks {
+	top: 0;
+	left: 0;
+	width: 12.5%;
+	height: 100%;
+	align-items: flex-start;
+}
+
+.chess-study .cg-wrap coords.ranks coord {
+	flex: 1 1 0;
+	transform: none;
+	padding: 4% 0 0 5%;
+}
+
+.chess-study .cg-wrap coords.files {
+	top: auto;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 12.5%;
+	align-items: flex-end;
+	text-align: right;
+}
+
+.chess-study .cg-wrap coords.files coord {
+	flex: 1 1 0;
+	padding: 0 3% 2% 0;
+}
+
+/* a1 is dark, so odd coordinates sit on dark squares when White is at the bottom. */
+.chess-study .cg-wrap coords.ranks:not(.black) coord:nth-child(odd),
+.chess-study .cg-wrap coords.files:not(.black) coord:nth-child(odd),
+.chess-study .cg-wrap coords.ranks.black coord:nth-child(even),
+.chess-study .cg-wrap coords.files.black coord:nth-child(even) {
+	color: var(--cs-light);
+}
+
+.chess-study .cg-wrap coords.ranks:not(.black) coord:nth-child(even),
+.chess-study .cg-wrap coords.files:not(.black) coord:nth-child(even),
+.chess-study .cg-wrap coords.ranks.black coord:nth-child(odd),
+.chess-study .cg-wrap coords.files.black coord:nth-child(odd) {
+	color: var(--cs-dark);
+}
+
+.chess-study .cs-eval {
+	position: relative;
+	flex: 0 0 var(--cs-eval-width);
+	border-radius: var(--cs-radius);
+	overflow: hidden;
+	background: var(--cs-eval-black);
+	box-shadow: 0 0 0 1px var(--background-modifier-border);
+}
+
+.chess-study .cs-eval-fill {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 50%;
+	background: var(--cs-eval-white);
+	transition: height 300ms ease;
+}
+
+.chess-study .cs-eval.is-flipped .cs-eval-fill {
+	top: 0;
+	bottom: auto;
+}
+
+.chess-study .cs-eval-label {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 6px;
+	text-align: center;
+	font-size: 10px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.02em;
+	color: var(--cs-eval-white);
+	transition: opacity 200ms ease;
+}
+
+/* The label sits at the end of the side that is ahead. */
+.chess-study .cs-eval.is-white-ahead .cs-eval-label,
+.chess-study .cs-eval.is-flipped:not(.is-white-ahead) .cs-eval-label {
+	top: auto;
+	bottom: 6px;
+}
+
+.chess-study .cs-eval.is-flipped.is-white-ahead .cs-eval-label {
+	top: 6px;
+	bottom: auto;
+}
+
+.chess-study .cs-eval.is-white-ahead .cs-eval-label {
+	color: var(--cs-eval-black);
+}
+
+.chess-study.cs-eval-pending .cs-eval-label {
+	opacity: 0.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.chess-study .cs-eval-fill {
+		transition: none;
+	}
+}
+
+/* ------------------------------------------------------------ promotion */
+
+.chess-study .cs-promotion-backdrop {
+	position: absolute;
+	inset: 0;
+	z-index: 20;
+	border-radius: var(--cs-radius);
+	background: rgba(0, 0, 0, 0.25);
+}
+
+.chess-study .cs-promotion.cg-wrap {
+	position: absolute;
+	top: 0;
+	z-index: 21;
+	display: flex;
+	flex-direction: column;
+	width: 12.5%;
+	background: #ffffff;
+	box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+	cursor: pointer;
+}
+
+.chess-study .cs-promotion.cg-wrap.is-bottom {
+	top: auto;
+	bottom: 0;
+	flex-direction: column-reverse;
+}
+
+.chess-study .cs-promotion-option {
+	position: relative;
+	aspect-ratio: 1;
+}
+
+.chess-study .cs-promotion-option:hover {
+	background: #e5e5e5;
+}
+
+.chess-study .cs-promotion.cg-wrap piece {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	transform: none;
+}
+
+.chess-study .cs-promotion-cancel {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 50%;
+	aspect-ratio: 2;
+	width: 100%;
+	background: #e5e5e5;
+	color: #505050;
+}
+
+.chess-study .cs-promotion-cancel svg {
+	width: 40%;
+	height: 40%;
+}
+
+/* ------------------------------------------------------------ controls */
+
+.chess-study .cs-controls {
+	display: flex;
+	flex: none;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--size-4-1) var(--size-4-2);
+}
+
+.chess-study .cs-annotate {
+	flex: 1 1 100%;
+	justify-content: space-between;
+}
+
+.chess-study .cs-group {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.chess-study .cs-button.is-active {
+	color: var(--interactive-accent);
+}
+
+.chess-study .cs-button:disabled {
+	opacity: 0.35;
+	cursor: default;
+	pointer-events: none;
+}
+
+.chess-study button.cs-nag-button {
+	--cs-nag: var(--text-muted);
+	min-width: 28px;
+	height: 26px;
+	padding: 0 6px;
+	border-radius: var(--radius-s);
+	border: none;
+	background: transparent;
+	box-shadow: none;
+	color: var(--cs-nag);
+	font-weight: 800;
+	font-size: var(--font-ui-small);
+	cursor: pointer;
+}
+
+.chess-study button.cs-nag-button:hover {
+	background: var(--background-modifier-hover);
+}
+
+.chess-study button.cs-nag-button.is-active {
+	background: var(--cs-nag);
+	color: #ffffff;
+}
+
+.chess-study button.cs-nag-button:disabled {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+/* ------------------------------------------------------------ engine line */
+
+.chess-study .cs-engine-line {
+	display: flex;
+	flex: none;
+	align-items: baseline;
+	gap: var(--size-4-2);
+	min-height: 1.5em;
+	font-size: var(--font-ui-small);
+	color: var(--text-muted);
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.chess-study.cs-engine-off .cs-engine-line {
+	display: none;
+}
+
+.chess-study .cs-score {
+	flex: none;
+	padding: 1px 6px;
+	border-radius: var(--radius-s);
+	background: var(--cs-eval-white);
+	color: var(--cs-eval-black);
+	font-weight: 800;
+	font-variant-numeric: tabular-nums;
+	border: 1px solid var(--background-modifier-border);
+}
+
+.chess-study .cs-pv {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-family: var(--font-monospace);
+	font-size: var(--font-smallest);
+}
+
+.chess-study .cs-depth {
+	flex: none;
+	color: var(--text-faint);
+	font-size: var(--font-smallest);
+}
+
+/* ------------------------------------------------------------ comment box */
+
+.chess-study .cs-comment-box {
+	flex: none;
+	width: 100%;
+	resize: vertical;
+	font-size: var(--font-ui-small);
+}
+
+/* ------------------------------------------------------------ move list */
+
+.chess-study .cs-moves {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	align-content: flex-start;
+	padding: var(--size-4-2);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	background: var(--background-secondary);
+	font-size: var(--font-ui-small);
+	line-height: 1.9;
+}
+
+.chess-study .cs-move {
+	display: inline-block;
+	padding: 0 4px;
+	margin-right: 2px;
+	border-radius: var(--radius-s);
+	line-height: 1.6;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.chess-study .cs-move:hover {
+	background: var(--background-modifier-hover);
+}
+
+.chess-study .cs-move.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.chess-study .cs-move-number {
+	margin-right: 3px;
+	color: var(--text-faint);
+}
+
+.chess-study .cs-move.is-active .cs-move-number {
+	color: inherit;
+	opacity: 0.75;
+}
+
+.chess-study .cs-san {
+	font-weight: var(--font-semibold);
+}
+
+.chess-study .cs-glyph {
+	margin-left: 1px;
+	font-weight: 800;
+}
+
+.chess-study .cs-move.is-active .cs-glyph {
+	color: inherit !important;
+}
+
+.chess-study .cs-variation {
+	color: var(--text-muted);
+}
+
+.chess-study div.cs-variation {
+	margin: 2px 0 2px var(--size-4-2);
+	padding-left: var(--size-4-2);
+	border-left: 2px solid var(--background-modifier-border);
+}
+
+.chess-study .cs-variation .cs-san {
+	font-weight: var(--font-normal);
+}
+
+.chess-study .cs-paren {
+	color: var(--text-faint);
+}
+
+.chess-study .cs-comment {
+	margin: 0 6px 0 2px;
+	color: var(--text-muted);
+	font-style: italic;
+}
+
+.chess-study .cs-result {
+	margin-left: 4px;
+	font-weight: var(--font-bold);
+}
+
+.chess-study .cs-empty {
+	color: var(--text-faint);
+}
+
+.chess-study .cs-error {
+	padding: var(--size-4-2) var(--size-4-3);
+	border-radius: var(--radius-m);
+	background: rgba(var(--color-red-rgb), 0.1);
+	color: var(--text-error);
+	font-size: var(--font-ui-small);
+}
