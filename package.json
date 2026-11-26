@@ -1,0 +1,25 @@
+{
+  "name": "obsidian-chess-study",
+  "version": "0.1.0",
+  "description": "Chess study boards for Obsidian",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc && node esbuild.config.mjs production",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "license": "GPL-3.0-or-later",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^26.6.10",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.14.4",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chessground": "^9.2.1",
+    "chessops": "^0.15.1"
+  },
+  "private": true
+}

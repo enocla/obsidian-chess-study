@@ -1,0 +1,9 @@
+{
+  "id": "chess-study",
+  "name": "Chess Study",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Interactive chess boards in PGN code blocks, with move editing, annotations, arrows and a cached Stockfish evaluation bar.",
+  "author": "enocla",
+  "isDesktopOnly": false
+}

@@ -1,0 +1,6 @@
+Stockfish.js 19.0.1, unmodified release build (lite, single-threaded WebAssembly).
+stockfish-19-lite-single.worker.js is stockfish-19-lite-single.js renamed so the
+bundler embeds it as text.
+Source and build instructions: https://github.com/nmrugg/stockfish.js/tree/v19.0.1
+Release: https://github.com/nmrugg/stockfish.js/releases/tag/v19.0.1
+License: GNU General Public License v3, see COPYING.txt.
